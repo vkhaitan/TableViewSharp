@@ -34,7 +34,7 @@ namespace Com.Evrencoskun.Tableview.Adapter
 
         private int mColumnHeaderHeight;
 
-        protected internal Context mContext;
+        private Context mContext;
 
         private ColumnHeaderRecyclerViewAdapter mColumnHeaderRecyclerViewAdapter;
 
@@ -184,6 +184,8 @@ namespace Com.Evrencoskun.Tableview.Adapter
         }
 
         public CellRecyclerViewAdapter CellRecyclerViewAdapter => GetCellRecyclerViewAdapter();
+
+        public Context Context { get => mContext; }
 
         public virtual CellRecyclerViewAdapter GetCellRecyclerViewAdapter()
         {

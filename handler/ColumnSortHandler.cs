@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Android.Support.V7.Util;
+using Android.Util;
 using Com.Evrencoskun.Tableview;
 using Com.Evrencoskun.Tableview.Adapter;
 using Com.Evrencoskun.Tableview.Adapter.Recyclerview;
@@ -64,44 +66,54 @@ namespace Com.Evrencoskun.Tableview.Handler
         public virtual void SortByRowHeader(SortState sortState)
         {
             IList<IRowHeader> originalRowHeaderList = mRowHeaderRecyclerViewAdapter.GetItems();
-            AList<IRowHeader> sortedRowHeaderList = new AList<IRowHeader>(originalRowHeaderList);
             IList<IList<ICell>> originalList = mCellRecyclerViewAdapter.GetItems();
-            AList<IList<ICell>> sortedList = new AList<IList<ICell>>(originalList);
+
+            List<IRowHeader> sortedRowHeaderList; 
+            List<IList<ICell>> sortedList;
+
+            AList<(IRowHeader row, IList<ICell> cells)> sortedCombinedList = new AList<(IRowHeader, IList<ICell>)>();
+            for(int i=0; i < originalRowHeaderList.Count; ++i)
+            {
+                sortedCombinedList.Add((originalRowHeaderList[i], originalList[i]));
+            }
+
             if (sortState != SortState.Unsorted)
             {
                 // Do descending / ascending sort
-                sortedRowHeaderList.Sort(new RowHeaderSortComparator(sortState));
-                // Sorting Columns/Cells using the same logic has sorting DataSet
-                RowHeaderForCellSortComparator rowHeaderForCellSortComparator =
-                    new RowHeaderForCellSortComparator(originalRowHeaderList, originalList, sortState);
-                sortedList.Sort(rowHeaderForCellSortComparator);
+                sortedCombinedList.Sort(new RowHeaderSortComparator(sortState));
+                sortedRowHeaderList = sortedCombinedList.ConvertAll(((IRowHeader row, IList<ICell> cells) input) => input.row);
+                sortedList = sortedCombinedList.ConvertAll(((IRowHeader row, IList<ICell> cells) input) => input.cells);
+                mRowHeaderRecyclerViewAdapter.GetRowHeaderSortHelper().SetSortingStatus(sortState);
+                // Set sorted data list
+                SwapItems(originalRowHeaderList, sortedRowHeaderList, sortedList, sortState);
             }
 
-            mRowHeaderRecyclerViewAdapter.GetRowHeaderSortHelper().SetSortingStatus(sortState);
-            // Set sorted data list
-            SwapItems(originalRowHeaderList, sortedRowHeaderList, sortedList, sortState);
+
         }
 
         public virtual void Sort(int column, SortState sortState)
         {
             IList<IList<ICell>> originalList = mCellRecyclerViewAdapter.GetItems();
-            AList<IList<ICell>> sortedList = new AList<IList<ICell>>(originalList);
             IList<IRowHeader> originalRowHeaderList = mRowHeaderRecyclerViewAdapter.GetItems();
-            AList<IRowHeader> sortedRowHeaderList = new AList<IRowHeader>(originalRowHeaderList);
+
+            AList<(IRowHeader row, IList<ICell> cells)> sortedCombinedList = new AList<(IRowHeader row, IList<ICell> cells)>();
+            for (int i= 0; i < originalList.Count; ++i)
+            {
+                sortedCombinedList.Add((originalRowHeaderList[i], originalList[i]));
+            }
+
+            List<IList<ICell>> sortedList; 
+            List<IRowHeader> sortedRowHeaderList;
             if (sortState != SortState.Unsorted)
             {
                 // Do descending / ascending sort
-                sortedList.Sort(new ColumnSortComparator(column, sortState));
-                // Sorting RowHeader using the same logic has sorting DataSet
-                ColumnForRowHeaderSortComparator columnForRowHeaderSortComparator =
-                    new ColumnForRowHeaderSortComparator(originalRowHeaderList, originalList, column, sortState);
-                sortedRowHeaderList.Sort(columnForRowHeaderSortComparator);
-            }
+                sortedCombinedList.Sort(new ColumnSortComparator(column, sortState));
+                sortedList = sortedCombinedList.ConvertAll(((IRowHeader row, IList<ICell> cells) input) => input.cells);
+                sortedRowHeaderList = sortedCombinedList.ConvertAll(((IRowHeader row, IList<ICell> cells) input) => input.row);
 
-            // Update sorting list of column headers
-            mColumnHeaderRecyclerViewAdapter.GetColumnSortHelper().SetSortingStatus(column, sortState);
-            // Set sorted data list
-            SwapItems(originalList, sortedList, column, sortedRowHeaderList, sortState);
+                mColumnHeaderRecyclerViewAdapter.GetColumnSortHelper().SetSortingStatus(column, sortState);
+                SwapItems(originalList, sortedList, column, sortedRowHeaderList, sortState);
+            }
         }
 
         private void SwapItems(IList<IRowHeader> oldRowHeader, IList<IRowHeader> newRowHeader,

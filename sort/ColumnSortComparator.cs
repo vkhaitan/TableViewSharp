@@ -21,7 +21,7 @@ using Com.Evrencoskun.Tableview.Adapter;
 namespace Com.Evrencoskun.Tableview.Sort
 {
     /// <summary>Created by evrencoskun on 25.11.2017.</summary>
-    public class ColumnSortComparator : AbstractSortComparator, IComparer<IList<ICell>>
+    public class ColumnSortComparator : AbstractSortComparator, IComparer<(IRowHeader row, IList<ICell> cells)>
     {
         private int mXPosition;
 
@@ -35,6 +35,21 @@ namespace Com.Evrencoskun.Tableview.Sort
         {
             object o1 = ((ISortableModel) t1[mXPosition]).GetContent();
             object o2 = ((ISortableModel) t2[mXPosition]).GetContent();
+            if (mSortState == SortState.Descending)
+            {
+                return CompareContent(o2, o1);
+            }
+            else
+            {
+                // Default sorting process is ASCENDING
+                return CompareContent(o1, o2);
+            }
+        }
+
+        public int Compare((IRowHeader row, IList<ICell> cells) t1, (IRowHeader row, IList<ICell> cells) t2)
+        {
+            object o1 = ((ISortableModel)t1.cells[mXPosition]).GetContent();
+            object o2 = ((ISortableModel)t2.cells[mXPosition]).GetContent();
             if (mSortState == SortState.Descending)
             {
                 return CompareContent(o2, o1);

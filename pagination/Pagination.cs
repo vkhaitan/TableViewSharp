@@ -326,29 +326,38 @@ namespace Com.Evrencoskun.Tableview.Pagination
 
         private void PaginateOnColumnSort(int column, SortState sortState)
         {
-            AList<IRowHeader> sortedRowHeaderList = new AList<IRowHeader>(originalRowData);
-            AList<IList<ICell>> sortedList = new AList<IList<ICell>>(originalCellData);
+            List<IRowHeader> sortedRowHeaderList;// = new AList<IRowHeader>(originalRowData);
+            List<IList<ICell>> sortedList; // = new AList<IList<ICell>>(originalCellData);
+            AList<(IRowHeader, IList<ICell>)> sortedCombinedList = new AList<(IRowHeader, IList<ICell>)>();
+            for(int i=0; i< originalRowData.Count; ++i)
+            {
+                sortedCombinedList.Add((originalRowData[i], originalCellData[i]));
+            }
             if (sortState != SortState.Unsorted)
             {
                 if (column == -1)
                 {
-                    sortedRowHeaderList.Sort(new RowHeaderSortComparator(sortState));
-                    RowHeaderForCellSortComparator rowHeaderForCellSortComparator =
-                        new RowHeaderForCellSortComparator(originalRowData, originalCellData, sortState);
-                    sortedList.Sort(rowHeaderForCellSortComparator);
+                    sortedCombinedList.Sort(new RowHeaderSortComparator(sortState));
+                    //RowHeaderForCellSortComparator rowHeaderForCellSortComparator =
+                    //    new RowHeaderForCellSortComparator(originalRowData, originalCellData, sortState);
+                    //sortedList.Sort(rowHeaderForCellSortComparator);
                 }
                 else
                 {
-                    sortedList.Sort(new ColumnSortComparator(column, sortState));
-                    ColumnForRowHeaderSortComparator columnForRowHeaderSortComparator =
-                        new ColumnForRowHeaderSortComparator(originalRowData, originalCellData, column, sortState);
-                    sortedRowHeaderList.Sort(columnForRowHeaderSortComparator);
+                    sortedCombinedList.Sort(new ColumnSortComparator(column, sortState));
+                    //ColumnForRowHeaderSortComparator columnForRowHeaderSortComparator =
+                    //    new ColumnForRowHeaderSortComparator(originalRowData, originalCellData, column, sortState);
+                    //sortedRowHeaderList.Sort(columnForRowHeaderSortComparator);
+
                 }
+                sortedList = sortedCombinedList.ConvertAll(((IRowHeader row, IList<ICell> cells) input) => input.cells);
+                sortedRowHeaderList = sortedCombinedList.ConvertAll(((IRowHeader row, IList<ICell> cells) input) => input.row);
+                originalRowData = new AList<IRowHeader>(sortedRowHeaderList);
+                originalCellData = new AList<IList<ICell>>(sortedList);
+                ReloadPages();
             }
 
-            originalRowData = new AList<IRowHeader>(sortedRowHeaderList);
-            originalCellData = new AList<IList<ICell>>(sortedList);
-            ReloadPages();
+
         }
 
         public class PageTurnedEventArgs : EventArgs
