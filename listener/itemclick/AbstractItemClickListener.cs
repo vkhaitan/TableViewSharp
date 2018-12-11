@@ -89,7 +89,11 @@ namespace Com.Evrencoskun.Tableview.Listener.Itemclick
 
         public virtual bool OnInterceptTouchEvent(RecyclerView view, MotionEvent e)
         {
-            return mGestureDetector.OnTouchEvent(e);
+            if (mGestureDetector.Handle != IntPtr.Zero)
+            {
+                return mGestureDetector.OnTouchEvent(e);
+            }
+            return false;
         }
 
         public virtual void OnTouchEvent(RecyclerView view, MotionEvent motionEvent)
