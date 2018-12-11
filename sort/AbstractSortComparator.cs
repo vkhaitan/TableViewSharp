@@ -16,10 +16,14 @@ namespace Com.Evrencoskun.Tableview.Sort
             }
             else if (o1 == null)
             {
+                if (mSortState == SortState.Ascending)
+                    return 1;
                 return -1;
             }
             else if (o2 == null)
             {
+                if (mSortState == SortState.Ascending)
+                    return -1;
                 return 1;
             }
             else
