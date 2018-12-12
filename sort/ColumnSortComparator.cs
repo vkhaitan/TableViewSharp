@@ -52,12 +52,26 @@ namespace Com.Evrencoskun.Tableview.Sort
             object o2 = ((ISortableModel)t2.cells[mXPosition]).GetContent();
             if (mSortState == SortState.Descending)
             {
-                return CompareContent(o2, o1);
+                try
+                {
+                    return CompareContent(o2, o1);
+                }
+                catch (System.Exception)
+                {
+                    return -1;
+                }
             }
             else
             {
-                // Default sorting process is ASCENDING
-                return CompareContent(o1, o2);
+                try
+                {
+                    // Default sorting process is ASCENDING
+                    return CompareContent(o1, o2);
+                }
+                catch (System.Exception)
+                {
+                    return -1;
+                }
             }
         }
     }
