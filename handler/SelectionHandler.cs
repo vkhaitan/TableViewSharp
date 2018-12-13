@@ -387,7 +387,7 @@ namespace Com.Evrencoskun.Tableview.Handler
             {
                 CellRecyclerView cellRowRecyclerView = (CellRecyclerView) mCellLayoutManager.FindViewByPosition(i);
                 AbstractViewHolder holder =
-                    (AbstractViewHolder) cellRowRecyclerView.FindViewHolderForAdapterPosition(column);
+                    (AbstractViewHolder) cellRowRecyclerView?.FindViewHolderForAdapterPosition(column);
                 if (holder != null)
                 {
                     // Get each view container of the cell view and set unselected color.
